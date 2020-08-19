@@ -136,13 +136,16 @@ def do_MCMC_and_get_kappa(datum1, datum2, bins, filelabel, nwalkers=500, nsample
     result2 = np.concatenate( (params, fracs2) )
     
     # plot the least-squares fit compared to the histograms
-    plt.errorbar(histbins, hist1, hist1_errs, color='blue')
-    plt.errorbar(histbins, hist2, hist2_errs, color='red')
-    plt.plot(histbins,[model_func(*result1,x) for x in histbins],'g--')
-    plt.plot(histbins,[model_func(*result2,x) for x in histbins],'m--')
+    plt.errorbar(histbins, hist1, hist1_errs, color='blue', label='histogram 1')
+    plt.errorbar(histbins, hist2, hist2_errs, color='red',label='histogram 2')
+    plt.plot(histbins,[model_func(*result1,x) for x in histbins],'g--',label='fit 1')
+    plt.plot(histbins,[model_func(*result2,x) for x in histbins],'m--',label='fit 2')
+    plt.xlabel('Constituent multiplicity')
+    plt.ylabel('Probability')
+    plt.legend()
     plt.xlim((0,50))
     current_dir = Path.cwd()
-    plt.savefig(current_dir / (filelabel+'least-squares_fit.png'))
+    plt.savefig(current_dir / (filelabel+'_least-squares_fit.png'))
     
     # do the MCMC    
     print('Starting MCMC')        
@@ -157,7 +160,7 @@ def do_MCMC_and_get_kappa(datum1, datum2, bins, filelabel, nwalkers=500, nsample
     for i in range(ndim):
         axes[i].plot(range(0,nsamples),samples[:, :, i], "k", alpha=0.3)
         axes[i].axvline(x=burn_in,color='blue')   
-    plt.savefig(current_dir / (filelabel+'MCMC_samples.png'))
+    plt.savefig(current_dir / (filelabel+'_MCMC_samples.png'))
     
     # randomly sample "nkappa" points from the posterior on which to extract kappa
     all_index_tuples = [ (i,j) for i in range(burn_in,len(samples)) for j in range(len(samples[0])) ]    
@@ -226,7 +229,7 @@ def get_kappa(all_samples, datum1, datum2, histbins, mask, filelabel, upsample_f
     mask2_zeros = hist2_n>0 # used for plotting only
     fig, (ax1,ax2) = plt.subplots(1,2)
     ax1.plot(histbins[mask2_zeros],hist1[mask2_zeros]/hist2[mask2_zeros],'b--')
-    ax2.plot(histbins[mask1_zeros],hist2[mask1_zeros]/hist1[mask1_zeros],'b--')
+    ax2.plot(histbins[mask1_zeros],hist2[mask1_zeros]/hist1[mask1_zeros],'b--',label='data')
 
     # "upsample" the histogram bins by upsample_factor to determine the bins on which kappa will be evaluated from the model
     model_bins = np.append( np.concatenate( ( [np.linspace(histbins[i],histbins[i+1],upsample_factor, endpoint=False) for i in range(len(histbins)-1)] ) ), histbins[-1] )
@@ -269,8 +272,13 @@ def get_kappa(all_samples, datum1, datum2, histbins, mask, filelabel, upsample_f
         ratio21_full = [model_func(*fit2,x)/model_func(*fit1,x) for x in model_bins] # used for plotting only
         ax1.plot(kappa12now_arg,kappa12now,'ko')
         ax1.plot(model_bins, ratio12_full,color='r',alpha=0.1)
-        ax2.plot(kappa21now_arg,kappa21now,'ko')
-        ax2.plot(model_bins, ratio21_full, color='r', alpha=0.1)
+        
+        if sample_index==0:
+            ax2.plot(kappa21now_arg,kappa21now,'ko',label='extracted kappas')
+            ax2.plot(model_bins, ratio21_full, color='r', alpha=0.1,label='MCMC fits')
+        else:
+            ax2.plot(kappa21now_arg,kappa21now,'ko')
+            ax2.plot(model_bins, ratio21_full, color='r', alpha=0.1)
         
         kappa12[sample_index] = kappa12now
         kappa21[sample_index] = kappa21now
@@ -278,6 +286,11 @@ def get_kappa(all_samples, datum1, datum2, histbins, mask, filelabel, upsample_f
     
     ax1.set_ylim((0,3))
     ax2.set_ylim((0,3))
+    ax1.set_ylabel('hist1/hist2')
+    ax2.set_ylabel('hist2/hist1')
+    ax1.set_xlabel('Constituent multiplicity')
+    ax2.set_xlabel('Constituent multiplicity')
+    ax2.legend()
     current_dir = Path.cwd()
     plt.savefig(current_dir / filelabel)
     
@@ -345,7 +358,10 @@ def plot_topics(datum1, datum2, datumQ, datumG, bins, kappas, filelabel):
     ax.plot(get_mean(bins),histG,color='k',linestyle='--',dashes=(5,5),label=r'$\gamma$+g')
     
     ax.set_xlim((0,50))
+    ax.set_xlabel('Constituent multiplicity')
+    ax.set_ylabel('Probability')
     ax.legend()
+    plt.tight_layout()
     
     current_dir = Path.cwd()
     fig.savefig(current_dir / (filelabel+'_topics.png'))
@@ -364,6 +380,7 @@ def plot_fractions(kappas, filelabel):
     hist,edges = np.histogram(f2)
     ax2.plot(get_mean(edges), hist)
     ax2.set_xlabel('fraction2')
+    plt.tight_layout()
     
     current_dir = Path.cwd()
     fig.savefig(current_dir / (filelabel+'_fractions.png'))
