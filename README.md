@@ -1,6 +1,6 @@
 # jet-topics-from-MCMC
 
-This code is designed to use the Markov Chain Monte Carlo (MCMC) emcee to calculate jet topics in proton-proton and heavy-ion collisions. It was developed by Jasmine Brewer and Andrew P. Turner with conceptual oversight from Jesse Thaler. It is based on OUR PREPRINT. If you use this code in part or in its entirety for scientific work, please cite OUR PREPRINT.
+This code is designed to use the Markov Chain Monte Carlo (MCMC) emcee to calculate jet topics in proton-proton and heavy-ion collisions. It was developed by Jasmine Brewer and Andrew P. Turner with conceptual oversight from Jesse Thaler. It is based on https://arxiv.org/abs/2008.08596. If you use this code in part or in its entirety for scientific work, please cite https://arxiv.org/abs/2008.08596.
 
 Along with the code, get_topics_from_MCMC.py, we also provide sample dijet and photon+jet histograms in proton-proton ('PP_JEWEL_etamax1_constmult.pickle') and heavy-ion collisions ('HI_JEWEL_etamax1_constmult_13invnbYJ.pickle') which can be used as an example to run the code. To run the code in its current form, the pickle files containing the sample histograms should be saved in the same directory as the .py file.
 
